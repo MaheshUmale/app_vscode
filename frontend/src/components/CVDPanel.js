@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createChart, ColorType, HistogramSeries } from 'lightweight-charts';
 
 export const CVDPanel = ({ candles }) => {
   const chartContainerRef = useRef();
@@ -6,66 +7,62 @@ export const CVDPanel = ({ candles }) => {
   useEffect(() => {
     if (!chartContainerRef.current || candles.length === 0) return;
 
-    import('lightweight-charts').then(({ createChart, ColorType }) => {
-      const chart = createChart(chartContainerRef.current, {
-        width: chartContainerRef.current.clientWidth,
-        height: chartContainerRef.current.clientHeight,
-        layout: {
-          background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: '#a8a8b8',
-        },
-        grid: {
-          vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
-          horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
-        },
-        timeScale: {
-          timeVisible: true,
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-        rightPriceScale: {
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-      });
-
-      const histogramSeries = chart.addHistogramSeries({
-        color: '#22c55e',
-        priceFormat: {
-          type: 'volume',
-        },
-      });
-
-      // Convert candles to CVD data
-      let cumulative = 0;
-      const cvdData = candles.map(candle => {
-        const delta = candle.close > candle.open ? candle.volume : -candle.volume;
-        cumulative += delta;
-        return {
-          time: candle.time,
-          value: cumulative,
-          color: delta > 0 ? '#22c55e' : '#ef4444',
-        };
-      });
-      
-      histogramSeries.setData(cvdData);
-
-      const handleResize = () => {
-        if (chartContainerRef.current) {
-          chart.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight,
-          });
-        }
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        chart.remove();
-      };
-    }).catch(err => {
-      console.error('Error loading chart:', err);
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: chartContainerRef.current.clientHeight,
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#a8a8b8',
+      },
+      grid: {
+        vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
+        horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
+      },
+      timeScale: {
+        timeVisible: true,
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
     });
+
+    const histogramSeries = chart.addSeries(HistogramSeries, {
+      color: '#22c55e',
+      priceFormat: {
+        type: 'volume',
+      },
+    });
+
+    // Convert candles to CVD data
+    let cumulative = 0;
+    const cvdData = candles.map(candle => {
+      const delta = candle.close > candle.open ? candle.volume : -candle.volume;
+      cumulative += delta;
+      return {
+        time: candle.time,
+        value: cumulative,
+        color: delta > 0 ? '#22c55e' : '#ef4444',
+      };
+    });
+
+    histogramSeries.setData(cvdData);
+
+    const handleResize = () => {
+      if (chartContainerRef.current) {
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.remove();
+    };
   }, [candles]);
 
   return (

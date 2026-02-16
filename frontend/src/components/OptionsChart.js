@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 
 export const OptionsChart = ({ candles, symbol }) => {
   const chartContainerRef = useRef();
@@ -6,54 +7,50 @@ export const OptionsChart = ({ candles, symbol }) => {
   useEffect(() => {
     if (!chartContainerRef.current || candles.length === 0) return;
 
-    import('lightweight-charts').then(({ createChart, ColorType }) => {
-      const chart = createChart(chartContainerRef.current, {
-        width: chartContainerRef.current.clientWidth,
-        height: chartContainerRef.current.clientHeight,
-        layout: {
-          background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: '#a8a8b8',
-        },
-        grid: {
-          vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
-          horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
-        },
-        timeScale: {
-          timeVisible: true,
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-        rightPriceScale: {
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-      });
-
-      const candlestickSeries = chart.addCandlestickSeries({
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
-      });
-
-      candlestickSeries.setData(candles);
-
-      const handleResize = () => {
-        if (chartContainerRef.current) {
-          chart.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight,
-          });
-        }
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        chart.remove();
-      };
-    }).catch(err => {
-      console.error('Error loading chart:', err);
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: chartContainerRef.current.clientHeight,
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#a8a8b8',
+      },
+      grid: {
+        vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
+        horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
+      },
+      timeScale: {
+        timeVisible: true,
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
     });
+
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#22c55e',
+      downColor: '#ef4444',
+      wickUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
+    });
+
+    candlestickSeries.setData(candles);
+
+    const handleResize = () => {
+      if (chartContainerRef.current) {
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      chart.remove();
+    };
   }, [candles]);
 
   return (

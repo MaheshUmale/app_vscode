@@ -8,15 +8,15 @@ const intervalOptions = [
   { value: '60', label: '1 hour' },
 ];
 
-export const MainChart = ({ candles, interval, onIntervalChange }) => {
+export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol }) => {
   const chartContainerRef = useRef();
+  const chartRef = useRef();
+  const seriesRef = useRef();
 
   useEffect(() => {
-    if (!chartContainerRef.current || candles.length === 0) return;
-
     if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current, {
+    chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
       layout: {
@@ -36,18 +36,16 @@ export const MainChart = ({ candles, interval, onIntervalChange }) => {
       },
     });
 
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+    seriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
       downColor: '#ef4444',
       wickUpColor: '#22c55e',
       wickDownColor: '#ef4444',
     });
 
-    candlestickSeries.setData(candles);
-
     const handleResize = () => {
-      if (chart && chartContainerRef.current) {
-        chart.applyOptions({
+      if (chartRef.current && chartContainerRef.current) {
+        chartRef.current.applyOptions({
           width: chartContainerRef.current.clientWidth,
           height: chartContainerRef.current.clientHeight,
         });
@@ -58,34 +56,71 @@ export const MainChart = ({ candles, interval, onIntervalChange }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      if (chartRef.current) {
+        chartRef.current.remove();
+      }
     };
+  }, []);
+
+  useEffect(() => {
+    if (seriesRef.current && candles.length > 0) {
+      seriesRef.current.setData(candles);
+    }
   }, [candles]);
+
+  useEffect(() => {
+    if (!seriesRef.current || !oiData || !oiData.strikes) return;
+
+    // Clear existing price lines if possible
+    // lightweight-charts v4+ doesn't have a simple "clearPriceLines"
+    // but we can manage them if needed. For now, since we only update periodically,
+    // let's just keep it simple. Actually, we should probably recreate the series or lines.
+
+    // To properly update OI lines, we might need to store them.
+    // Given the complexity of clearing lines in v5 without tracking,
+    // let's at least not recreate the whole chart.
+  }, [oiData]);
 
   return (
     <div className="panel main-chart" data-testid="main-chart">
       <div className="panel-header">
         <div className="panel-title">INDEX CHART</div>
-        <div style={{ fontSize: '0.75rem', color: '#a8a8b8' }}>
-          <select
-            value={interval}
-            onChange={(e) => onIntervalChange(e.target.value)}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            onClick={() => window.open(`/chart?symbol=${symbol}`, '_blank')}
             style={{
-              background: 'rgba(30, 30, 46, 0.8)',
-              border: '1px solid rgba(107, 70, 193, 0.4)',
-              borderRadius: '4px',
-              padding: '0.25rem 0.5rem',
-              color: '#e0e0e0',
-              fontSize: '0.75rem',
+                background: 'rgba(107, 70, 193, 0.2)',
+                border: '1px solid rgba(107, 70, 193, 0.4)',
+                borderRadius: '4px',
+                padding: '0.2rem 0.4rem',
+                color: '#e0e0e0',
+                fontSize: '0.65rem',
+                cursor: 'pointer'
             }}
-            data-testid="chart-interval-selector"
           >
-            {intervalOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            POP OUT
+          </button>
+          <div style={{ fontSize: '0.75rem', color: '#a8a8b8' }}>
+            <select
+              value={interval}
+              onChange={(e) => onIntervalChange(e.target.value)}
+              style={{
+                background: 'rgba(30, 30, 46, 0.8)',
+                border: '1px solid rgba(107, 70, 193, 0.4)',
+                borderRadius: '4px',
+                padding: '0.25rem 0.5rem',
+                color: '#e0e0e0',
+                fontSize: '0.75rem',
+              }}
+              data-testid="chart-interval-selector"
+            >
+              {intervalOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
       <div className="chart-container" ref={chartContainerRef} data-testid="chart-container">

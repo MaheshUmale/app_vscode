@@ -2,10 +2,6 @@ from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-try:
-    from motor.motor_asyncio import AsyncIOMotorClient
-except ImportError:
-    AsyncIOMotorClient = None
 import os
 import logging
 import json
@@ -16,93 +12,21 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Dict, Any, Optional
 import uuid
 from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+from sqlite_db import sqlite_db
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # Mock logic toggle
-USE_MOCK_DB = os.environ.get('USE_MOCK_DB', 'false').lower() == 'true'
 USE_MOCK_DATA = os.environ.get('USE_MOCK_DATA', 'false').lower() == 'true'
-
-# MongoDB connection Mock Classes
-class MockCollection:
-    def __init__(self):
-        self.data = []
-
-    async def find_one(self, query, projection=None):
-        if not self.data:
-            return None
-        import copy
-        return copy.deepcopy(self.data[0])
-
-    async def find(self, *args, **kwargs):
-        class AsyncCursor:
-            def __init__(self, data): self.data = data
-            def sort(self, *args, **kwargs): return self
-            def limit(self, *args, **kwargs): return self
-            def __aiter__(self): return self
-            async def __anext__(self):
-                if not self.data: raise StopAsyncIteration
-                return self.data.pop(0)
-            async def to_list(self, length): return self.data[:length]
-        return AsyncCursor(list(self.data))
-
-    async def insert_one(self, doc):
-        self.data.append(doc)
-        return type('obj', (object,), {'inserted_id': 'mock_id'})
-
-    async def update_one(self, query, update, upsert=False):
-        if upsert and not self.data:
-            self.data.append(update['$set'])
-        elif self.data:
-            self.data[0].update(update['$set'])
-        return type('obj', (object,), {'modified_count': 1})
-
-class MockDB:
-    def __init__(self):
-        self._collections = {}
-
-    def __getattr__(self, name):
-        if name not in self._collections:
-            self._collections[name] = MockCollection()
-        return self._collections[name]
-
-    def __getitem__(self, name):
-        return self.__getattr__(name)
-
-class MockClient:
-    def __init__(self, url):
-        self.db = MockDB()
-    def __getitem__(self, name):
-        return self.db
-    def __getattr__(self, name):
-        return self.db
-    def close(self):
-        pass
-
-# Database Initialization
-mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-if USE_MOCK_DB or AsyncIOMotorClient is None:
-    if AsyncIOMotorClient is None and not USE_MOCK_DB:
-        print("Warning: motor could not be imported. Falling back to MockDB.")
-    client = MockClient(mongo_url)
-    db = client[os.environ.get('DB_NAME', 'test_database')]
-else:
-    try:
-        client = AsyncIOMotorClient(mongo_url)
-        db = client[os.environ.get('DB_NAME', 'test_database')]
-    except Exception as e:
-        print(f"Warning: Failed to initialize AsyncIOMotorClient: {e}. Falling back to MockDB.")
-        client = MockClient(mongo_url)
-        db = client[os.environ.get('DB_NAME', 'test_database')]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic can go here
+    # Startup: Initialize SQLite
+    await sqlite_db.init_db()
     yield
-    # Shutdown logic
-    if not USE_MOCK_DB:
-        client.close()
+    # Shutdown: any cleanup if needed
 
 # Create the main app without a prefix
 app = FastAPI(lifespan=lifespan)
@@ -260,10 +184,14 @@ async def get_candles(symbol: str = "NIFTY", interval: str = "1", n_bars: int = 
     if USE_MOCK_DATA:
         candles = generate_mock_candles(symbol, interval, n_bars)
     else:
-        # Placeholder for real data provider integration
-        # from data.tradingview_api import fetch_tv_candles
-        # candles = fetch_tv_candles(symbol, interval, n_bars)
-        candles = generate_mock_candles(symbol, interval, n_bars)
+        try:
+            from data.tv_api import tv_api
+            candles = await tv_api.get_hist_candles(symbol, interval, n_bars)
+            if not candles:
+                candles = generate_mock_candles(symbol, interval, n_bars)
+        except Exception as e:
+            logger.error(f"Error fetching real candles: {e}")
+            candles = generate_mock_candles(symbol, interval, n_bars)
 
     return {"symbol": symbol, "interval": interval, "candles": candles}
 
@@ -272,14 +200,24 @@ async def get_oi_data(symbol: str = "NIFTY"):
     if USE_MOCK_DATA:
         return generate_mock_oi_data(symbol)
 
-    from data.nse_api import fetch_nse_oi_data
-    
     try:
+        # Try Trendlyne first
+        from data.trendlyne_api import trendlyne_api
+        stock_id = await trendlyne_api.get_stock_id(symbol)
+        if stock_id:
+            expiries = await trendlyne_api.get_expiry_dates(stock_id)
+            if expiries:
+                data = await trendlyne_api.get_oi_data(stock_id, expiries[0], datetime.now().strftime("%H:%M"))
+                if data:
+                    return data
+
+        # Fallback to NSE
+        from data.nse_api import fetch_nse_oi_data
         data = fetch_nse_oi_data(symbol)
         if data:
             return data
     except Exception as e:
-        logging.error(f"Error fetching OI data: {e}")
+        logger.error(f"Error fetching OI data: {e}")
     
     return generate_mock_oi_data(symbol)
 
@@ -289,22 +227,19 @@ async def get_liquidity_data():
 
 @api_router.get("/account")
 async def get_account():
-    account_doc = await db.accounts.find_one({}, {"_id": 0})
+    account_doc = await sqlite_db.get_account()
     if not account_doc:
         account = Account()
         doc = account.model_dump()
         doc['timestamp'] = doc['timestamp'].isoformat()
-        await db.accounts.insert_one(doc)
-        return account
-    
-    if isinstance(account_doc['timestamp'], str):
-        account_doc['timestamp'] = datetime.fromisoformat(account_doc['timestamp'])
+        await sqlite_db.update_account(doc)
+        return doc
     
     return account_doc
 
 @api_router.post("/order")
 async def place_order(order: Order):
-    account_doc = await db.accounts.find_one({}, {"_id": 0})
+    account_doc = await sqlite_db.get_account()
     if not account_doc:
         account = Account()
         account_doc = account.model_dump()
@@ -322,10 +257,15 @@ async def place_order(order: Order):
                 entry_price=order.price,
                 current_price=order.price
             )
-            account_doc['positions'].append(position.model_dump())
+            pos_doc = position.model_dump()
+            pos_doc['timestamp'] = pos_doc['timestamp'].isoformat()
+
+            # Update account
+            await sqlite_db.update_account(account_doc)
+            # Add position
+            await sqlite_db.update_position(pos_doc)
             
-            await db.accounts.update_one({}, {"$set": account_doc}, upsert=True)
-            return {"status": "success", "message": "Order executed", "order_id": str(uuid.uuid4())}
+            return {"status": "success", "message": "Order executed", "order_id": pos_doc['id']}
         else:
             return {"status": "error", "message": "Insufficient balance"}
     
@@ -333,10 +273,7 @@ async def place_order(order: Order):
 
 @api_router.get("/positions")
 async def get_positions():
-    account_doc = await db.accounts.find_one({}, {"_id": 0})
-    if account_doc and 'positions' in account_doc:
-        return account_doc['positions']
-    return []
+    return await sqlite_db.get_positions()
 
 # WebSocket endpoint
 @app.websocket("/ws")
@@ -407,3 +344,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

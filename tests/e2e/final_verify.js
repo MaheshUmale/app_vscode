@@ -16,12 +16,20 @@ const path = require('path');
     const mainChart = await page.waitForSelector('[data-testid="main-chart"]', { timeout: 10000 });
     const optionsChart = await page.waitForSelector('[data-testid="options-chart"]', { timeout: 10000 });
     const cvdPanel = await page.waitForSelector('[data-testid="cvd-panel"]', { timeout: 10000 });
+    const footprintChart = await page.waitForSelector('[data-testid="footprint-chart"]', { timeout: 10000 });
 
-    if (mainChart && optionsChart && cvdPanel) {
+    if (mainChart && optionsChart && cvdPanel && footprintChart) {
       console.log('✅ All major components found!');
     } else {
       console.error('❌ Some components missing');
       process.exit(1);
+    }
+
+    // Verify removed panels are NOT present
+    const executionPanel = await page.$('[data-testid="execution-panel"]');
+    if (executionPanel) {
+        console.error('❌ ExecutionPanel should have been removed');
+        process.exit(1);
     }
 
     // Verify chart containers have content (canvases)

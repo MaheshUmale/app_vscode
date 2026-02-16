@@ -16,10 +16,74 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Mock logic toggle
+USE_MOCK_DB = os.environ.get('USE_MOCK_DB', 'false').lower() == 'true'
+USE_MOCK_DATA = os.environ.get('USE_MOCK_DATA', 'false').lower() == 'true'
+
+# MongoDB connection Mock Classes
+class MockCollection:
+    def __init__(self):
+        self.data = []
+
+    async def find_one(self, query, projection=None):
+        if not self.data:
+            return None
+        import copy
+        return copy.deepcopy(self.data[0])
+
+    async def find(self, *args, **kwargs):
+        class AsyncCursor:
+            def __init__(self, data): self.data = data
+            def sort(self, *args, **kwargs): return self
+            def limit(self, *args, **kwargs): return self
+            def __aiter__(self): return self
+            async def __anext__(self):
+                if not self.data: raise StopAsyncIteration
+                return self.data.pop(0)
+            async def to_list(self, length): return self.data[:length]
+        return AsyncCursor(list(self.data))
+
+    async def insert_one(self, doc):
+        self.data.append(doc)
+        return type('obj', (object,), {'inserted_id': 'mock_id'})
+
+    async def update_one(self, query, update, upsert=False):
+        if upsert and not self.data:
+            self.data.append(update['$set'])
+        elif self.data:
+            self.data[0].update(update['$set'])
+        return type('obj', (object,), {'modified_count': 1})
+
+class MockDB:
+    def __init__(self):
+        self._collections = {}
+
+    def __getattr__(self, name):
+        if name not in self._collections:
+            self._collections[name] = MockCollection()
+        return self._collections[name]
+
+    def __getitem__(self, name):
+        return self.__getattr__(name)
+
+class MockClient:
+    def __init__(self, url):
+        self.db = MockDB()
+    def __getitem__(self, name):
+        return self.db
+    def __getattr__(self, name):
+        return self.db
+    def close(self):
+        pass
+
+# Database Initialization
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+if USE_MOCK_DB:
+    client = MockClient(mongo_url)
+    db = client[os.environ.get('DB_NAME', 'test_database')]
+else:
+    client = AsyncIOMotorClient(mongo_url)
+    db = client[os.environ.get('DB_NAME', 'test_database')]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -39,7 +103,8 @@ class ConnectionManager:
         self.subscriptions[websocket] = []
 
     def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
         if websocket in self.subscriptions:
             del self.subscriptions[websocket]
 
@@ -173,11 +238,15 @@ async def root():
 
 @api_router.get("/market/candles")
 async def get_candles(symbol: str = "NIFTY", interval: str = "1", n_bars: int = 100):
+    # Currently only mock candles are available in the system
     candles = generate_mock_candles(symbol, interval, n_bars)
     return {"symbol": symbol, "interval": interval, "candles": candles}
 
 @api_router.get("/market/oi-data")
 async def get_oi_data(symbol: str = "NIFTY"):
+    if USE_MOCK_DATA:
+        return generate_mock_oi_data(symbol)
+
     from data.nse_api import fetch_nse_oi_data
     
     try:
@@ -316,4 +385,5 @@ logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
-    client.close()
+    if not USE_MOCK_DB:
+        client.close()

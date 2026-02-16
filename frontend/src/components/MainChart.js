@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 
 const intervalOptions = [
   { value: '1', label: '1 minute' },
@@ -13,63 +14,51 @@ export const MainChart = ({ candles, interval, onIntervalChange }) => {
   useEffect(() => {
     if (!chartContainerRef.current || candles.length === 0) return;
 
-    let chart;
-    let removeResizeListener;
+    if (!chartContainerRef.current) return;
 
-    import('lightweight-charts').then(({ createChart, ColorType }) => {
-      if (!chartContainerRef.current) return;
-
-      chart = createChart(chartContainerRef.current, {
-        width: chartContainerRef.current.clientWidth,
-        height: chartContainerRef.current.clientHeight,
-        layout: {
-          background: { type: ColorType.Solid, color: 'transparent' },
-          textColor: '#a8a8b8',
-        },
-        grid: {
-          vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
-          horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
-        },
-        timeScale: {
-          timeVisible: true,
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-        rightPriceScale: {
-          borderColor: 'rgba(107, 70, 193, 0.3)',
-        },
-      });
-
-      const candlestickSeries = chart.addCandlestickSeries({
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
-      });
-
-      candlestickSeries.setData(candles);
-
-      const handleResize = () => {
-        if (chart && chartContainerRef.current) {
-          chart.applyOptions({
-            width: chartContainerRef.current.clientWidth,
-            height: chartContainerRef.current.clientHeight,
-          });
-        }
-      };
-
-      window.addEventListener('resize', handleResize);
-      removeResizeListener = () => window.removeEventListener('resize', handleResize);
-    }).catch((err) => {
-      console.error('Error loading chart:', err);
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: chartContainerRef.current.clientHeight,
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: '#a8a8b8',
+      },
+      grid: {
+        vertLines: { color: 'rgba(107, 70, 193, 0.1)' },
+        horzLines: { color: 'rgba(107, 70, 193, 0.1)' },
+      },
+      timeScale: {
+        timeVisible: true,
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(107, 70, 193, 0.3)',
+      },
     });
 
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#22c55e',
+      downColor: '#ef4444',
+      wickUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
+    });
+
+    candlestickSeries.setData(candles);
+
+    const handleResize = () => {
+      if (chart && chartContainerRef.current) {
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight,
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
-      if (removeResizeListener) {
-        removeResizeListener();
-      }
-      if (chart) {
-        chart.remove();
-      }
+      window.removeEventListener('resize', handleResize);
+      chart.remove();
     };
   }, [candles]);
 

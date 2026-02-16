@@ -11,30 +11,31 @@ export const useWebSocket = (url) => {
       const ws = new WebSocket(url);
       
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected to:', url);
         setReadyState(1);
       };
 
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          console.debug('WebSocket message received:', data.type);
           setLastMessage(data);
         } catch (error) {
-          console.error('Error parsing WebSocket message:', error);
+          console.error('Error parsing WebSocket message:', error, event.data);
         }
       };
 
       ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
+        console.error('WebSocket error on URL:', url, error);
       };
 
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected from:', url, 'code:', event.code, 'reason:', event.reason);
         setReadyState(0);
         
         // Reconnect after 5 seconds
         reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('Reconnecting...');
+          console.log('Reconnecting to:', url);
           connect();
         }, 5000);
       };

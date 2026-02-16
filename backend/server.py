@@ -238,8 +238,14 @@ async def root():
 
 @api_router.get("/market/candles")
 async def get_candles(symbol: str = "NIFTY", interval: str = "1", n_bars: int = 100):
-    # Currently only mock candles are available in the system
-    candles = generate_mock_candles(symbol, interval, n_bars)
+    if USE_MOCK_DATA:
+        candles = generate_mock_candles(symbol, interval, n_bars)
+    else:
+        # Placeholder for real data provider integration
+        # from data.tradingview_api import fetch_tv_candles
+        # candles = fetch_tv_candles(symbol, interval, n_bars)
+        candles = generate_mock_candles(symbol, interval, n_bars)
+
     return {"symbol": symbol, "interval": interval, "candles": candles}
 
 @api_router.get("/market/oi-data")

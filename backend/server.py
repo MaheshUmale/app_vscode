@@ -2,7 +2,10 @@ from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+try:
+    from motor.motor_asyncio import AsyncIOMotorClient
+except ImportError:
+    AsyncIOMotorClient = None
 import os
 import logging
 import json
@@ -78,12 +81,19 @@ class MockClient:
 
 # Database Initialization
 mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-if USE_MOCK_DB:
+if USE_MOCK_DB or AsyncIOMotorClient is None:
+    if AsyncIOMotorClient is None and not USE_MOCK_DB:
+        print("Warning: motor could not be imported. Falling back to MockDB.")
     client = MockClient(mongo_url)
     db = client[os.environ.get('DB_NAME', 'test_database')]
 else:
-    client = AsyncIOMotorClient(mongo_url)
-    db = client[os.environ.get('DB_NAME', 'test_database')]
+    try:
+        client = AsyncIOMotorClient(mongo_url)
+        db = client[os.environ.get('DB_NAME', 'test_database')]
+    except Exception as e:
+        print(f"Warning: Failed to initialize AsyncIOMotorClient: {e}. Falling back to MockDB.")
+        client = MockClient(mongo_url)
+        db = client[os.environ.get('DB_NAME', 'test_database')]
 
 # Create the main app without a prefix
 app = FastAPI()

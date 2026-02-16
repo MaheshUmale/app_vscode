@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
 
 export const CVDPanel = ({ candles }) => {
   const chartContainerRef = useRef();
@@ -13,7 +13,7 @@ export const CVDPanel = ({ candles }) => {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
       layout: {
-        background: { color: 'transparent' },
+        background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#a8a8b8',
       },
       grid: {

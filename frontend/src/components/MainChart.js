@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
 
 export const MainChart = ({ candles, symbol, interval }) => {
   const chartContainerRef = useRef();
@@ -13,7 +13,7 @@ export const MainChart = ({ candles, symbol, interval }) => {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
       layout: {
-        background: { color: 'transparent' },
+        background: { type: ColorType.Solid, color: 'transparent' },
         textColor: '#a8a8b8',
       },
       grid: {
@@ -82,7 +82,7 @@ export const MainChart = ({ candles, symbol, interval }) => {
   return (
     <div className="panel main-chart" data-testid="main-chart">
       <div className="panel-header">
-        <div className="panel-title">INDEX (Undely/lya) CHART</div>
+        <div className="panel-title">INDEX (Underly/lya) CHART</div>
         <div style={{ fontSize: '0.75rem', color: '#a8a8b8' }}>
           <select
             style={{

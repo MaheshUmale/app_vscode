@@ -59,5 +59,12 @@ npx playwright test tests/e2e/final_verify.js
 ```
 This script checks for the successful rendering of all charting components.
 
+## Real Data Integration
+To transition from mock data to real live market data, see the [Live Data Integration Guide](LIVE_DATA_INTEGRATION.md).
+
+It covers integration with:
+- **TradingView (OHLCV):** via `tvDatafeed` and `tv_live_wss`.
+- **Trendlyne (OI/PCR):** via `trendlyne_api`.
+
 ## Screenshots
 A sample screenshot of the running dashboard in mock mode is available as `dashboard_screenshot.png`.

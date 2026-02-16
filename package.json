@@ -1,0 +1,10 @@
+{
+  "name": "trading-dashboard",
+  "version": "1.0.0",
+  "scripts": {
+    "test:e2e": "node tests/e2e/final_verify.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.41.0"
+  }
+}

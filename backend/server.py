@@ -10,6 +10,7 @@ import os
 import logging
 import json
 import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Dict, Any, Optional
@@ -95,8 +96,16 @@ else:
         client = MockClient(mongo_url)
         db = client[os.environ.get('DB_NAME', 'test_database')]
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic can go here
+    yield
+    # Shutdown logic
+    if not USE_MOCK_DB:
+        client.close()
+
 # Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
@@ -398,8 +407,3 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    if not USE_MOCK_DB:
-        client.close()

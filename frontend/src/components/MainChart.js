@@ -1,14 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 
-export const MainChart = ({ candles, symbol, interval }) => {
+const intervalOptions = [
+  { value: '1', label: '1 minute' },
+  { value: '5', label: '5 minute' },
+  { value: '15', label: '15 minute' },
+  { value: '60', label: '1 hour' },
+];
+
+export const MainChart = ({ candles, interval, onIntervalChange }) => {
   const chartContainerRef = useRef();
 
   useEffect(() => {
     if (!chartContainerRef.current || candles.length === 0) return;
 
-    // Dynamically import lightweight-charts
+    let chart;
+    let removeResizeListener;
+
     import('lightweight-charts').then(({ createChart, ColorType }) => {
-      const chart = createChart(chartContainerRef.current, {
+      if (!chartContainerRef.current) return;
+
+      chart = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
         height: chartContainerRef.current.clientHeight,
         layout: {
@@ -38,7 +49,7 @@ export const MainChart = ({ candles, symbol, interval }) => {
       candlestickSeries.setData(candles);
 
       const handleResize = () => {
-        if (chartContainerRef.current) {
+        if (chart && chartContainerRef.current) {
           chart.applyOptions({
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight,
@@ -47,22 +58,29 @@ export const MainChart = ({ candles, symbol, interval }) => {
       };
 
       window.addEventListener('resize', handleResize);
-
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        chart.remove();
-      };
-    }).catch(err => {
+      removeResizeListener = () => window.removeEventListener('resize', handleResize);
+    }).catch((err) => {
       console.error('Error loading chart:', err);
     });
+
+    return () => {
+      if (removeResizeListener) {
+        removeResizeListener();
+      }
+      if (chart) {
+        chart.remove();
+      }
+    };
   }, [candles]);
 
   return (
     <div className="panel main-chart" data-testid="main-chart">
       <div className="panel-header">
-        <div className="panel-title">INDEX (Underly/lya) CHART</div>
+        <div className="panel-title">INDEX CHART</div>
         <div style={{ fontSize: '0.75rem', color: '#a8a8b8' }}>
           <select
+            value={interval}
+            onChange={(e) => onIntervalChange(e.target.value)}
             style={{
               background: 'rgba(30, 30, 46, 0.8)',
               border: '1px solid rgba(107, 70, 193, 0.4)',
@@ -73,10 +91,11 @@ export const MainChart = ({ candles, symbol, interval }) => {
             }}
             data-testid="chart-interval-selector"
           >
-            <option>1 minute</option>
-            <option>5 minute</option>
-            <option>15 minute</option>
-            <option>1 hour</option>
+            {intervalOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

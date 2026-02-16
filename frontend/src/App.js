@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import '@/App.css';
 import { TopBar } from './components/TopBar';
 import { AnalyticsPanel } from './components/AnalyticsPanel';
@@ -11,12 +11,12 @@ import { CVDPanel } from './components/CVDPanel';
 import { PositionsPanel } from './components/PositionsPanel';
 import { useWebSocket } from './hooks/useWebSocket';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 const API = `${BACKEND_URL}/api`;
 
 function App() {
   const [symbol, setSymbol] = useState('NIFTY');
-  const [interval, setInterval] = useState('1');
+  const [interval, setIntervalValue] = useState('1');
   const [livePrice, setLivePrice] = useState(null);
   const [candles, setCandles] = useState([]);
   const [oiData, setOiData] = useState(null);
@@ -24,48 +24,26 @@ function App() {
   const [positions, setPositions] = useState([]);
   const [account, setAccount] = useState(null);
 
-  // WebSocket connection
-  const { lastMessage, sendMessage } = useWebSocket(
-    BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws'
+  const websocketUrl = useMemo(
+    () => BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://') + '/ws',
+    []
   );
 
-  // Handle WebSocket messages
-  useEffect(() => {
-    if (lastMessage) {
-      if (lastMessage.type === 'live_tick') {
-        setLivePrice(lastMessage);
-      }
-    }
-  }, [lastMessage]);
+  const marketRegime = useMemo(() => {
+    const pcr = oiData?.pcr ?? 0.85;
+    if (pcr < 0.8) return { label: 'Risk-Off Bearish', tone: 'negative' };
+    if (pcr > 1.1) return { label: 'Risk-On Bullish', tone: 'positive' };
+    return { label: 'Balanced / Range', tone: 'neutral' };
+  }, [oiData]);
 
-  // Subscribe to symbols on WebSocket connect
-  useEffect(() => {
-    if (sendMessage) {
-      sendMessage({
-        type: 'subscribe',
-        symbols: [symbol]
-      });
-    }
-  }, [symbol, sendMessage]);
+  const netExposure = useMemo(() => {
+    if (!positions.length) return 0;
+    return positions.reduce((acc, pos) => acc + (pos.quantity || 0) * (pos.current_price || 0), 0);
+  }, [positions]);
 
-  // Fetch initial data
-  useEffect(() => {
-    fetchCandles();
-    fetchOIData();
-    fetchLiquidityData();
-    fetchAccount();
-    fetchPositions();
+  const { lastMessage, sendMessage, readyState } = useWebSocket(websocketUrl);
 
-    const interval = setInterval(() => {
-      fetchOIData();
-      fetchLiquidityData();
-      fetchPositions();
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [symbol]);
-
-  const fetchCandles = async () => {
+  const fetchCandles = useCallback(async () => {
     try {
       const response = await fetch(`${API}/market/candles?symbol=${symbol}&interval=${interval}&n_bars=100`);
       const data = await response.json();
@@ -73,9 +51,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching candles:', error);
     }
-  };
+  }, [interval, symbol]);
 
-  const fetchOIData = async () => {
+  const fetchOIData = useCallback(async () => {
     try {
       const response = await fetch(`${API}/market/oi-data?symbol=${symbol}`);
       const data = await response.json();
@@ -83,9 +61,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching OI data:', error);
     }
-  };
+  }, [symbol]);
 
-  const fetchLiquidityData = async () => {
+  const fetchLiquidityData = useCallback(async () => {
     try {
       const response = await fetch(`${API}/market/liquidity`);
       const data = await response.json();
@@ -93,9 +71,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching liquidity data:', error);
     }
-  };
+  }, []);
 
-  const fetchAccount = async () => {
+  const fetchAccount = useCallback(async () => {
     try {
       const response = await fetch(`${API}/account`);
       const data = await response.json();
@@ -103,9 +81,9 @@ function App() {
     } catch (error) {
       console.error('Error fetching account:', error);
     }
-  };
+  }, []);
 
-  const fetchPositions = async () => {
+  const fetchPositions = useCallback(async () => {
     try {
       const response = await fetch(`${API}/positions`);
       const data = await response.json();
@@ -113,7 +91,39 @@ function App() {
     } catch (error) {
       console.error('Error fetching positions:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (lastMessage?.type === 'live_tick') {
+      setLivePrice(lastMessage);
+    }
+  }, [lastMessage]);
+
+  useEffect(() => {
+    if (readyState === 1) {
+      sendMessage({
+        type: 'subscribe',
+        symbols: [symbol]
+      });
+    }
+  }, [readyState, sendMessage, symbol]);
+
+  useEffect(() => {
+    fetchCandles();
+    fetchOIData();
+    fetchLiquidityData();
+    fetchAccount();
+    fetchPositions();
+
+    const refreshTimer = setInterval(() => {
+      fetchCandles();
+      fetchOIData();
+      fetchLiquidityData();
+      fetchPositions();
+    }, 5000);
+
+    return () => clearInterval(refreshTimer);
+  }, [fetchAccount, fetchCandles, fetchLiquidityData, fetchOIData, fetchPositions]);
 
   const handlePlaceOrder = async (order) => {
     try {
@@ -125,14 +135,13 @@ function App() {
         body: JSON.stringify(order),
       });
       const data = await response.json();
-      
+
       if (data.status === 'success') {
         await fetchAccount();
         await fetchPositions();
         return { success: true, message: data.message };
-      } else {
-        return { success: false, message: data.message };
       }
+      return { success: false, message: data.message };
     } catch (error) {
       console.error('Error placing order:', error);
       return { success: false, message: 'Order failed' };
@@ -142,49 +151,69 @@ function App() {
   return (
     <div className="App">
       <div className="dashboard">
-        <TopBar 
+        <TopBar
           symbol={symbol}
           livePrice={livePrice}
           account={account}
           onSymbolChange={setSymbol}
         />
-        
+
+        <div className="market-pulse-row" data-testid="market-pulse-row">
+          <div className="pulse-chip">
+            <span className="pulse-label">Feed</span>
+            <span className="pulse-value">{readyState === 1 ? 'Live WSS' : 'Polling Backup'}</span>
+          </div>
+          <div className={`pulse-chip ${marketRegime.tone}`}>
+            <span className="pulse-label">Regime</span>
+            <span className="pulse-value">{marketRegime.label}</span>
+          </div>
+          <div className="pulse-chip">
+            <span className="pulse-label">Open Positions</span>
+            <span className="pulse-value">{positions.length}</span>
+          </div>
+          <div className="pulse-chip">
+            <span className="pulse-label">Net Exposure</span>
+            <span className="pulse-value">₹{netExposure.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+          </div>
+        </div>
+
         <div className="dashboard-grid">
-          <AnalyticsPanel 
+          <AnalyticsPanel
             oiData={oiData}
             symbol={symbol}
           />
-          
-          <MainChart 
+
+          <MainChart
             candles={candles}
             symbol={symbol}
             interval={interval}
+            onIntervalChange={setIntervalValue}
           />
-          
-          <ExecutionPanel 
+
+          <ExecutionPanel
             liquidityData={liquidityData}
           />
-          
-          <OptionsChart 
+
+          <OptionsChart
             candles={candles}
             symbol={symbol}
           />
-          
-          <OrderPanel 
+
+          <OrderPanel
             symbol={symbol}
             oiData={oiData}
             onPlaceOrder={handlePlaceOrder}
           />
-          
-          <OIChangePanel 
+
+          <OIChangePanel
             oiData={oiData}
           />
-          
-          <CVDPanel 
+
+          <CVDPanel
             candles={candles}
           />
-          
-          <PositionsPanel 
+
+          <PositionsPanel
             positions={positions}
           />
         </div>

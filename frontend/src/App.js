@@ -1,27 +1,34 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import '@/App.css';
 import { TopBar } from './components/TopBar';
 import { AnalyticsPanel } from './components/AnalyticsPanel';
 import { MainChart } from './components/MainChart';
-import { ExecutionPanel } from './components/ExecutionPanel';
+import { VolumeFootprintChart } from './components/VolumeFootprintChart';
 import { OptionsChart } from './components/OptionsChart';
-import { OrderPanel } from './components/OrderPanel';
 import { OIChangePanel } from './components/OIChangePanel';
 import { CVDPanel } from './components/CVDPanel';
-import { PositionsPanel } from './components/PositionsPanel';
+import { PopoutChart } from './components/PopoutChart';
 import { useWebSocket } from './hooks/useWebSocket';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 const API = `${BACKEND_URL}/api`;
 
 function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/chart" element={<PopoutChart />} />
+    </Routes>
+  );
+}
+
+function Dashboard() {
   const [symbol, setSymbol] = useState('NIFTY');
   const [interval, setIntervalValue] = useState('1');
   const [livePrice, setLivePrice] = useState(null);
   const [candles, setCandles] = useState([]);
   const [oiData, setOiData] = useState(null);
-  const [liquidityData, setLiquidityData] = useState([]);
-  const [positions, setPositions] = useState([]);
   const [account, setAccount] = useState(null);
 
   const websocketUrl = useMemo(
@@ -35,11 +42,6 @@ function App() {
     if (pcr > 1.1) return { label: 'Risk-On Bullish', tone: 'positive' };
     return { label: 'Balanced / Range', tone: 'neutral' };
   }, [oiData]);
-
-  const netExposure = useMemo(() => {
-    if (!positions.length) return 0;
-    return positions.reduce((acc, pos) => acc + (pos.quantity || 0) * (pos.current_price || 0), 0);
-  }, [positions]);
 
   const { lastMessage, sendMessage, readyState } = useWebSocket(websocketUrl);
 
@@ -63,16 +65,6 @@ function App() {
     }
   }, [symbol]);
 
-  const fetchLiquidityData = useCallback(async () => {
-    try {
-      const response = await fetch(`${API}/market/liquidity`);
-      const data = await response.json();
-      setLiquidityData(data);
-    } catch (error) {
-      console.error('Error fetching liquidity data:', error);
-    }
-  }, []);
-
   const fetchAccount = useCallback(async () => {
     try {
       const response = await fetch(`${API}/account`);
@@ -80,16 +72,6 @@ function App() {
       setAccount(data);
     } catch (error) {
       console.error('Error fetching account:', error);
-    }
-  }, []);
-
-  const fetchPositions = useCallback(async () => {
-    try {
-      const response = await fetch(`${API}/positions`);
-      const data = await response.json();
-      setPositions(data);
-    } catch (error) {
-      console.error('Error fetching positions:', error);
     }
   }, []);
 
@@ -111,42 +93,15 @@ function App() {
   useEffect(() => {
     fetchCandles();
     fetchOIData();
-    fetchLiquidityData();
     fetchAccount();
-    fetchPositions();
 
     const refreshTimer = setInterval(() => {
       fetchCandles();
       fetchOIData();
-      fetchLiquidityData();
-      fetchPositions();
     }, 5000);
 
     return () => clearInterval(refreshTimer);
-  }, [fetchAccount, fetchCandles, fetchLiquidityData, fetchOIData, fetchPositions]);
-
-  const handlePlaceOrder = async (order) => {
-    try {
-      const response = await fetch(`${API}/order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(order),
-      });
-      const data = await response.json();
-
-      if (data.status === 'success') {
-        await fetchAccount();
-        await fetchPositions();
-        return { success: true, message: data.message };
-      }
-      return { success: false, message: data.message };
-    } catch (error) {
-      console.error('Error placing order:', error);
-      return { success: false, message: 'Order failed' };
-    }
-  };
+  }, [fetchAccount, fetchCandles, fetchOIData]);
 
   return (
     <div className="App">
@@ -167,14 +122,6 @@ function App() {
             <span className="pulse-label">Regime</span>
             <span className="pulse-value">{marketRegime.label}</span>
           </div>
-          <div className="pulse-chip">
-            <span className="pulse-label">Open Positions</span>
-            <span className="pulse-value">{positions.length}</span>
-          </div>
-          <div className="pulse-chip">
-            <span className="pulse-label">Net Exposure</span>
-            <span className="pulse-value">₹{netExposure.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-          </div>
         </div>
 
         <div className="dashboard-grid">
@@ -187,22 +134,18 @@ function App() {
             candles={candles}
             symbol={symbol}
             interval={interval}
+            oiData={oiData}
             onIntervalChange={setIntervalValue}
           />
 
-          <ExecutionPanel
-            liquidityData={liquidityData}
+          <VolumeFootprintChart
+            candles={candles}
+            interval={interval}
           />
 
           <OptionsChart
             candles={candles}
             symbol={symbol}
-          />
-
-          <OrderPanel
-            symbol={symbol}
-            oiData={oiData}
-            onPlaceOrder={handlePlaceOrder}
           />
 
           <OIChangePanel
@@ -211,10 +154,6 @@ function App() {
 
           <CVDPanel
             candles={candles}
-          />
-
-          <PositionsPanel
-            positions={positions}
           />
         </div>
       </div>

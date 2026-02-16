@@ -1,46 +1,44 @@
 # Trading Dashboard
 
-A comprehensive trading dashboard built with React and Python, featuring real-time charts powered by `lightweight-charts` v5.1.0.
-
-## Overview
-This application provides a visual interface for monitoring market data, options, and Cumulative Volume Delta (CVD) panels. It supports both live data (via MongoDB and NSE API) and a standalone "Mock Mode" for testing and development.
+A comprehensive trading dashboard built with React and Python, featuring real-time charts powered by `lightweight-charts` v5.1.0, Volume Footprint, and CVD panels.
 
 ## Features
--   **Main Chart:** Candlestick and volume visualization.
--   **Options Chart:** Call/Put open interest tracking.
+-   **Main Chart:** Candlestick visualization with **OI Profile** integration.
+-   **Volume Footprint:** Detailed buy/sell volume at each price level, POC (Point of Control), and Value Area. Available on 5m timeframe and above.
 -   **CVD Panel:** Cumulative Volume Delta analysis.
--   **Mock Mode:** Runs without external database or API dependencies.
+-   **Pop-out Feature:** Open a dedicated view of Candlestick + Footprint + CVD in a new tab.
+-   **Real Data Integration:** Supports TradingView (via scraper) and Trendlyne/NSE APIs.
+-   **SQLite Backend:** Uses SQLite for local storage of accounts and positions.
 
-## Frontend Migration (v5.1.0)
-The frontend has been migrated to `lightweight-charts` v5.1.0, incorporating:
--   Updated series creation API (`addSeries`).
--   Refined initialization patterns for better stability.
--   Pinned `ajv` to `8.17.1` for dependency resolution.
-
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 -   Node.js (v18+)
--   Python (v3.9+)
+-   Python (v3.12+)
 
-### Installation
-1.  **Frontend:**
-    ```bash
-    cd frontend
-    npm install
-    ```
-2.  **Backend:**
-    ```bash
-    cd backend
-    pip install -r requirements.txt
-    ```
+## Installation
 
-### Running in Mock Mode (Recommended for testing)
-To run the application without a live MongoDB instance or NSE API credentials:
+### 1. Backend
+```bash
+cd backend
+pip install -r requirements.txt
+```
 
+### 2. Frontend
+```bash
+cd frontend
+npm install
+```
+
+## Running the Application
+
+### On Windows
+Simply run the `run.bat` file in the root directory:
+```cmd
+run.bat
+```
+
+### On Linux/macOS
 1.  **Start the Backend:**
     ```bash
-    export USE_MOCK_DB=true
     export USE_MOCK_DATA=true
     cd backend
     python server.py
@@ -52,19 +50,14 @@ To run the application without a live MongoDB instance or NSE API credentials:
     ```
     The dashboard will be available at `http://localhost:3000`.
 
-## Testing
-To verify the application setup and rendering:
-```bash
-npx playwright test tests/e2e/final_verify.js
-```
-This script checks for the successful rendering of all charting components.
+## Pop-out View
+You can open a specific chart view by navigating to:
+`http://localhost:3000/chart?symbol=NIFTY`
 
 ## Real Data Integration
-To transition from mock data to real live market data, see the [Live Data Integration Guide](LIVE_DATA_INTEGRATION.md).
-
-It covers integration with:
-- **TradingView (OHLCV):** via `tvDatafeed` and `tv_live_wss`.
-- **Trendlyne (OI/PCR):** via `trendlyne_api`.
+To transition from mock data to real market data:
+1. Set `USE_MOCK_DATA=false` in your environment.
+2. Refer to `LIVE_DATA_INTEGRATION.md` for more details on API configurations.
 
 ## Screenshots
-A sample screenshot of the running dashboard in mock mode is available as `dashboard_screenshot.png`.
+A sample screenshot of the running dashboard is available as `dashboard_screenshot.png`.

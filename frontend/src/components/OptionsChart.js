@@ -1,13 +1,15 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
+import { createChart, ColorType, HistogramSeries } from 'lightweight-charts';
 
 export const OptionsChart = ({ candles, symbol }) => {
   const chartContainerRef = useRef();
+  const chartRef = useRef();
+  const seriesRef = useRef();
 
   useEffect(() => {
-    if (!chartContainerRef.current || candles.length === 0) return;
+    if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current, {
+    chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
       layout: {
@@ -27,18 +29,16 @@ export const OptionsChart = ({ candles, symbol }) => {
       },
     });
 
-    const candlestickSeries = chart.addSeries(CandlestickSeries, {
-      upColor: '#22c55e',
-      downColor: '#ef4444',
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
+    seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
+      color: '#8f7cff',
+      priceFormat: {
+        type: 'volume',
+      },
     });
 
-    candlestickSeries.setData(candles);
-
     const handleResize = () => {
-      if (chartContainerRef.current) {
-        chart.applyOptions({
+      if (chartRef.current && chartContainerRef.current) {
+        chartRef.current.applyOptions({
           width: chartContainerRef.current.clientWidth,
           height: chartContainerRef.current.clientHeight,
         });
@@ -49,23 +49,30 @@ export const OptionsChart = ({ candles, symbol }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      if (chartRef.current) chartRef.current.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    if (seriesRef.current && candles.length > 0) {
+      const data = candles.map(candle => ({
+        time: candle.time,
+        value: candle.volume,
+        color: candle.close >= candle.open ? 'rgba(57, 229, 140, 0.5)' : 'rgba(255, 91, 127, 0.5)',
+      }));
+      seriesRef.current.setData(data);
+    }
   }, [candles]);
 
   return (
     <div className="panel options-chart" data-testid="options-chart">
       <div className="panel-header">
-        <div className="panel-title">OPTIONS CHART</div>
-        <div style={{ fontSize: '0.75rem', color: '#a8a8b8' }}>
-          <span style={{ marginRight: '1rem', color: '#ef4444' }}>Bearish OB</span>
-          <span style={{ color: '#22c55e' }}>Bullish OB</span>
-        </div>
+        <div className="panel-title">VOLUME ANALYSIS: {symbol}</div>
       </div>
       <div className="chart-container" ref={chartContainerRef} data-testid="options-chart-container">
         {candles.length === 0 && (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#a8a8b8' }}>
-            Loading chart data...
+            Waiting for market data...
           </div>
         )}
       </div>

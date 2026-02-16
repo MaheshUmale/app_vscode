@@ -3,11 +3,13 @@ import { createChart, ColorType, HistogramSeries } from 'lightweight-charts';
 
 export const CVDPanel = ({ candles }) => {
   const chartContainerRef = useRef();
+  const chartRef = useRef();
+  const seriesRef = useRef();
 
   useEffect(() => {
-    if (!chartContainerRef.current || candles.length === 0) return;
+    if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current, {
+    chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
       layout: {
@@ -27,30 +29,16 @@ export const CVDPanel = ({ candles }) => {
       },
     });
 
-    const histogramSeries = chart.addSeries(HistogramSeries, {
+    seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
       color: '#22c55e',
       priceFormat: {
         type: 'volume',
       },
     });
 
-    // Convert candles to CVD data
-    let cumulative = 0;
-    const cvdData = candles.map(candle => {
-      const delta = candle.close > candle.open ? candle.volume : -candle.volume;
-      cumulative += delta;
-      return {
-        time: candle.time,
-        value: cumulative,
-        color: delta > 0 ? '#22c55e' : '#ef4444',
-      };
-    });
-
-    histogramSeries.setData(cvdData);
-
     const handleResize = () => {
-      if (chartContainerRef.current) {
-        chart.applyOptions({
+      if (chartRef.current && chartContainerRef.current) {
+        chartRef.current.applyOptions({
           width: chartContainerRef.current.clientWidth,
           height: chartContainerRef.current.clientHeight,
         });
@@ -61,8 +49,24 @@ export const CVDPanel = ({ candles }) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      if (chartRef.current) chartRef.current.remove();
     };
+  }, []);
+
+  useEffect(() => {
+    if (seriesRef.current && candles.length > 0) {
+      let cumulative = 0;
+      const cvdData = candles.map(candle => {
+        const delta = candle.close > candle.open ? candle.volume : -candle.volume;
+        cumulative += delta;
+        return {
+          time: candle.time,
+          value: cumulative,
+          color: delta > 0 ? '#22c55e' : '#ef4444',
+        };
+      });
+      seriesRef.current.setData(cvdData);
+    }
   }, [candles]);
 
   return (

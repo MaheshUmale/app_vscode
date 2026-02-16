@@ -12,7 +12,7 @@ export const AnalyticsPanel = ({ oiData, symbol }) => {
   };
 
   const angle = getGaugePosition(pcr);
-  const isB earish = pcr < 0.7;
+  const isBearish = pcr < 0.7;
   const isBullish = pcr > 1.1;
   
   // Get top 5 strikes by volume for display

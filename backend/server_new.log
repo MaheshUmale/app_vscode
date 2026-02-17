@@ -1,0 +1,47 @@
+INFO:     Started server process [49524]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     ('127.0.0.1', 33230) - "WebSocket /ws" [accepted]
+INFO:     127.0.0.1:33232 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33244 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     connection open
+INFO:     127.0.0.1:33250 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33250 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33232 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 33262) - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:33244 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:33244 - "GET /api/market/candles?symbol=NIFTY&interval=5&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33232 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33250 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 33278) - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:33244 - "GET /api/market/candles?symbol=NIFTY&interval=5&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33250 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 50902) - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50904 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50916 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50922 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 50932) - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50922 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50904 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50916 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:50916 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50922 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 58264) - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:50922 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50916 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     connection closed
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [49524]

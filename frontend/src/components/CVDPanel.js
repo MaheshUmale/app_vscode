@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType } from 'lightweight-charts';
+import { createChart, ColorType, HistogramSeries } from 'lightweight-charts';
 
 export const CVDPanel = ({ candles }) => {
   const chartContainerRef = useRef();
@@ -29,12 +29,21 @@ export const CVDPanel = ({ candles }) => {
       },
     });
 
-    seriesRef.current = chartRef.current.addHistogramSeries({
-      color: '#22c55e',
-      priceFormat: {
-        type: 'volume',
-      },
-    });
+    if (chartRef.current.addSeries) {
+      seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
+        color: '#22c55e',
+        priceFormat: {
+          type: 'volume',
+        },
+      });
+    } else if (chartRef.current.addHistogramSeries) {
+      seriesRef.current = chartRef.current.addHistogramSeries({
+        color: '#22c55e',
+        priceFormat: {
+          type: 'volume',
+        },
+      });
+    }
 
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {

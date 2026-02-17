@@ -273,3 +273,8 @@ INFO:     connection open
 2026-02-17 06:15:50,670 - INFO - WebSocket disconnected. Total connections: 0
 INFO:     connection closed
 INFO:     connection closed
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-02-17 08:31:47,548 - INFO - Shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [67705]

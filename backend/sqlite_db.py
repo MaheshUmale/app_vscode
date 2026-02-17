@@ -50,7 +50,7 @@ class SQLiteDB:
                 return [json.loads(row['data']) for row in rows]
 
     async def update_position(self, position_data):
-         async with aiosqlite.connect(self.db_path) as db:
+        async with aiosqlite.connect(self.db_path) as db:
             await db.execute(
                 "INSERT OR REPLACE INTO positions (id, data) VALUES (?, ?)",
                 (position_data['id'], json.dumps(position_data))

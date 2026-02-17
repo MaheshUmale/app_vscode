@@ -29,21 +29,13 @@ export const OptionsChart = ({ candles, symbol }) => {
       },
     });
 
-    if (chartRef.current.addSeries) {
-      seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
-        color: '#8f7cff',
-        priceFormat: {
-          type: 'volume',
-        },
-      });
-    } else if (chartRef.current.addHistogramSeries) {
-      seriesRef.current = chartRef.current.addHistogramSeries({
-        color: '#8f7cff',
-        priceFormat: {
-          type: 'volume',
-        },
-      });
-    }
+    // Use modern v5 API
+    seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
+      color: '#8f7cff',
+      priceFormat: {
+        type: 'volume',
+      },
+    });
 
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {

@@ -29,21 +29,13 @@ export const CVDPanel = ({ candles }) => {
       },
     });
 
-    if (chartRef.current.addSeries) {
-      seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
-        color: '#22c55e',
-        priceFormat: {
-          type: 'volume',
-        },
-      });
-    } else if (chartRef.current.addHistogramSeries) {
-      seriesRef.current = chartRef.current.addHistogramSeries({
-        color: '#22c55e',
-        priceFormat: {
-          type: 'volume',
-        },
-      });
-    }
+    // Use modern v5 API
+    seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
+      color: '#22c55e',
+      priceFormat: {
+        type: 'volume',
+      },
+    });
 
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {

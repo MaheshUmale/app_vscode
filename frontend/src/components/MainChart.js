@@ -16,9 +16,6 @@ export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol 
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    console.log('MainChart: createChart');
-    console.log('CandlestickSeries:', CandlestickSeries);
-
     chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
@@ -39,23 +36,13 @@ export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol 
       },
     });
 
-    if (chartRef.current.addSeries) {
-        seriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
-          upColor: '#22c55e',
-          downColor: '#ef4444',
-          wickUpColor: '#22c55e',
-          wickDownColor: '#ef4444',
-        });
-    } else if (chartRef.current.addCandlestickSeries) {
-        seriesRef.current = chartRef.current.addCandlestickSeries({
-          upColor: '#22c55e',
-          downColor: '#ef4444',
-          wickUpColor: '#22c55e',
-          wickDownColor: '#ef4444',
-        });
-    } else {
-        console.error('MainChart: No addSeries or addCandlestickSeries found on chart object');
-    }
+    // Use modern v5 API
+    seriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
+      upColor: '#22c55e',
+      downColor: '#ef4444',
+      wickUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
+    });
 
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {

@@ -16,6 +16,9 @@ export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol 
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
+    console.log('MainChart: createChart');
+    console.log('CandlestickSeries:', CandlestickSeries);
+
     chartRef.current = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
       height: chartContainerRef.current.clientHeight,
@@ -36,12 +39,23 @@ export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol 
       },
     });
 
-    seriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
-      upColor: '#22c55e',
-      downColor: '#ef4444',
-      wickUpColor: '#22c55e',
-      wickDownColor: '#ef4444',
-    });
+    if (chartRef.current.addSeries) {
+        seriesRef.current = chartRef.current.addSeries(CandlestickSeries, {
+          upColor: '#22c55e',
+          downColor: '#ef4444',
+          wickUpColor: '#22c55e',
+          wickDownColor: '#ef4444',
+        });
+    } else if (chartRef.current.addCandlestickSeries) {
+        seriesRef.current = chartRef.current.addCandlestickSeries({
+          upColor: '#22c55e',
+          downColor: '#ef4444',
+          wickUpColor: '#22c55e',
+          wickDownColor: '#ef4444',
+        });
+    } else {
+        console.error('MainChart: No addSeries or addCandlestickSeries found on chart object');
+    }
 
     const handleResize = () => {
       if (chartRef.current && chartContainerRef.current) {
@@ -68,17 +82,38 @@ export const MainChart = ({ candles, interval, onIntervalChange, oiData, symbol 
     }
   }, [candles]);
 
+  const oiLinesRef = useRef([]);
+
   useEffect(() => {
     if (!seriesRef.current || !oiData || !oiData.strikes) return;
 
-    // Clear existing price lines if possible
-    // lightweight-charts v4+ doesn't have a simple "clearPriceLines"
-    // but we can manage them if needed. For now, since we only update periodically,
-    // let's just keep it simple. Actually, we should probably recreate the series or lines.
+    // Clear existing price lines
+    oiLinesRef.current.forEach(line => {
+      try {
+        seriesRef.current.removePriceLine(line);
+      } catch (e) {
+        // Line might have already been removed
+      }
+    });
+    oiLinesRef.current = [];
 
-    // To properly update OI lines, we might need to store them.
-    // Given the complexity of clearing lines in v5 without tracking,
-    // let's at least not recreate the whole chart.
+    // Find top strikes by OI
+    const sortedStrikes = [...oiData.strikes].sort((a, b) =>
+      (b.ce_oi + b.pe_oi) - (a.ce_oi + a.pe_oi)
+    ).slice(0, 5); // Show top 5 OI strikes
+
+    sortedStrikes.forEach(strike => {
+      const isCEHigher = strike.ce_oi > strike.pe_oi;
+      const line = seriesRef.current.createPriceLine({
+        price: strike.strike,
+        color: isCEHigher ? 'rgba(239, 68, 68, 0.4)' : 'rgba(34, 197, 94, 0.4)',
+        lineWidth: 1,
+        lineStyle: 2, // Dashed
+        axisLabelVisible: true,
+        title: `${isCEHigher ? 'CE' : 'PE'} OI: ${Math.round((isCEHigher ? strike.ce_oi : strike.pe_oi) / 1000)}k`,
+      });
+      oiLinesRef.current.push(line);
+    });
   }, [oiData]);
 
   return (

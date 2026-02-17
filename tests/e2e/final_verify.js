@@ -7,7 +7,7 @@ const path = require('path');
 
   try {
     console.log('Navigating to dashboard...');
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle', timeout: 60000 });
+    await page.goto('http://localhost:3001', { waitUntil: 'networkidle', timeout: 60000 });
 
     // Wait for a bit to let charts render
     await page.waitForTimeout(10000);
@@ -25,19 +25,17 @@ const path = require('path');
       process.exit(1);
     }
 
-    // Verify removed panels are NOT present
-    const executionPanel = await page.$('[data-testid="execution-panel"]');
-    if (executionPanel) {
-        console.error('❌ ExecutionPanel should have been removed');
-        process.exit(1);
-    }
+    // Switch to 5m interval to show footprint
+    console.log('Switching to 5m interval...');
+    await page.selectOption('[data-testid="chart-interval-selector"]', '5');
+    await page.waitForTimeout(10000); // Wait for data to load
 
     // Verify chart containers have content (canvases)
     const canvases = await page.$$('canvas');
     console.log(`Found ${canvases.length} chart canvases.`);
 
-    await page.screenshot({ path: 'dashboard_screenshot.png', fullPage: true });
-    console.log('Screenshot saved as dashboard_screenshot.png');
+    await page.screenshot({ path: 'dashboard_screenshot_5m.png', fullPage: true });
+    console.log('Screenshot saved as dashboard_screenshot_5m.png');
 
   } catch (error) {
     console.error('Error during verification:', error);

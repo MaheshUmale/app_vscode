@@ -7,9 +7,15 @@ export const TopBar = ({ symbol, livePrice, account, onSymbolChange }) => {
     return price ? price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
   };
 
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const getCurrentTime = () => {
     const now = new Date();
-    return now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
   };
 
   const currentPrice = livePrice?.ltp || 22150.50;
@@ -36,7 +42,7 @@ export const TopBar = ({ symbol, livePrice, account, onSymbolChange }) => {
           {isPositive ? '+' : ''}{changePercent.toFixed(2)}% ↑
         </span>
         <span style={{ fontSize: '0.9rem', color: '#a8a8b8', marginLeft: '1rem' }}>
-          {livePrice?.timestamp ? new Date(livePrice.timestamp).toLocaleTimeString('en-IN') : getCurrentTime()}
+          {livePrice?.timestamp ? new Date(livePrice.timestamp).toLocaleTimeString('en-IN') : (mounted ? getCurrentTime() : '--:--:--')}
         </span>
       </div>
 

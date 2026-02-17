@@ -1,0 +1,197 @@
+2026-02-17 05:56:56,826 - DEBUG - Using selector: EpollSelector
+INFO:     Started server process [64631]
+INFO:     Waiting for application startup.
+2026-02-17 05:56:56,873 - INFO - Starting up: Initializing database
+2026-02-17 05:56:56,874 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc03c40>
+2026-02-17 05:56:56,875 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc03c40> completed
+2026-02-17 05:56:56,875 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbed210>, '\n                CREATE TABLE IF NOT EXISTS accounts (\n                    id TEXT PRIMARY KEY,\n                    data TEXT\n                )\n            ', [])
+2026-02-17 05:56:56,876 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbed210>, '\n                CREATE TABLE IF NOT EXISTS accounts (\n                    id TEXT PRIMARY KEY,\n                    data TEXT\n                )\n            ', []) completed
+2026-02-17 05:56:56,876 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbed210>, '\n                CREATE TABLE IF NOT EXISTS positions (\n                    id TEXT PRIMARY KEY,\n                    data TEXT\n                )\n            ', [])
+2026-02-17 05:56:56,877 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbed210>, '\n                CREATE TABLE IF NOT EXISTS positions (\n                    id TEXT PRIMARY KEY,\n                    data TEXT\n                )\n            ', []) completed
+2026-02-17 05:56:56,877 - DEBUG - executing functools.partial(<built-in method commit of sqlite3.Connection object at 0x7febedbed210>)
+2026-02-17 05:56:56,877 - DEBUG - operation functools.partial(<built-in method commit of sqlite3.Connection object at 0x7febedbed210>) completed
+2026-02-17 05:56:56,877 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbed210>)
+2026-02-17 05:56:56,878 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbed210>) completed
+2026-02-17 05:56:56,878 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc03f60>
+2026-02-17 05:56:56,878 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc03f60> completed
+2026-02-17 05:56:57,011 - INFO - Quote session generated: qs_wxduucjbqank, Chart session generated: cs_aklmwyolwakl
+2026-02-17 05:56:57,011 - DEBUG - Sending message: ~m~54~m~{"m":"set_auth_token","p":["unauthorized_user_token"]}
+2026-02-17 05:56:57,012 - DEBUG - Sending message: ~m~34~m~{"m":"set_locale","p":["en","US"]}
+2026-02-17 05:56:57,012 - DEBUG - Sending message: ~m~55~m~{"m":"chart_create_session","p":["cs_aklmwyolwakl",""]}
+2026-02-17 05:56:57,012 - DEBUG - Sending message: ~m~52~m~{"m":"quote_create_session","p":["qs_wxduucjbqank"]}
+2026-02-17 05:56:57,012 - DEBUG - Sending message: ~m~307~m~{"m":"quote_set_fields","p":["qs_wxduucjbqank","ch","chp","current_session","description","local_description","language","exchange","fractional","is_tradable","lp","lp_time","minmov","minmove2","original_name","pricescale","pro_name","short_name","type","update_mode","volume","currency_code","rchp","rtc"]}
+2026-02-17 05:56:57,012 - DEBUG - Sending message: ~m~51~m~{"m":"quote_hibernate_all","p":["qs_wxduucjbqank"]}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     ('127.0.0.1', 42234) - "WebSocket /ws" [accepted]
+2026-02-17 05:57:45,441 - INFO - WebSocket connected. Total connections: 1
+INFO:     connection open
+INFO:     127.0.0.1:42238 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42240 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:57:45,468 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc14680>
+2026-02-17 05:57:45,469 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc14680> completed
+INFO:     ('127.0.0.1', 42262) - "WebSocket /ws" [accepted]
+2026-02-17 05:57:45,471 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+2026-02-17 05:57:45,471 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc445e0>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 05:57:45,472 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc445e0>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 05:57:45,472 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5c7c0>)
+2026-02-17 05:57:45,472 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5c7c0>) completed
+2026-02-17 05:57:45,472 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5c7c0>)
+2026-02-17 05:57:45,472 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5c7c0>) completed
+2026-02-17 05:57:45,473 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc445e0>)
+2026-02-17 05:57:45,473 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc445e0>) completed
+2026-02-17 05:57:45,473 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc55120>
+2026-02-17 05:57:45,473 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc55120> completed
+INFO:     127.0.0.1:42250 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42278 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42300 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:57:45,490 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc16700>
+2026-02-17 05:57:45,491 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc16700> completed
+2026-02-17 05:57:45,492 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc472e0>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 05:57:45,492 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc472e0>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 05:57:45,496 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5d240>)
+2026-02-17 05:57:45,496 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5d240>) completed
+2026-02-17 05:57:45,497 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5d240>)
+2026-02-17 05:57:45,497 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5d240>) completed
+2026-02-17 05:57:45,497 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc472e0>)
+2026-02-17 05:57:45,497 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc472e0>) completed
+2026-02-17 05:57:45,498 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc165c0>
+2026-02-17 05:57:45,498 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc165c0> completed
+INFO:     127.0.0.1:42286 - "GET /api/account HTTP/1.1" 200 OK
+2026-02-17 05:57:45,585 - INFO - WebSocket disconnected. Total connections: 1
+INFO:     connection closed
+INFO:     127.0.0.1:42286 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42300 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 34558) - "WebSocket /ws" [accepted]
+2026-02-17 05:57:50,589 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+INFO:     127.0.0.1:42300 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42286 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:57:58,426 - INFO - WebSocket disconnected. Total connections: 1
+2026-02-17 05:57:58,427 - INFO - WebSocket disconnected. Total connections: 0
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 51320) - "WebSocket /ws" [accepted]
+2026-02-17 05:59:02,827 - INFO - WebSocket connected. Total connections: 1
+INFO:     connection open
+INFO:     127.0.0.1:51328 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51342 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:59:02,850 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc16ca0>
+2026-02-17 05:59:02,850 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc16ca0> completed
+2026-02-17 05:59:02,850 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc462f0>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 05:59:02,851 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc462f0>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 05:59:02,851 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5d340>)
+2026-02-17 05:59:02,852 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5d340>) completed
+2026-02-17 05:59:02,852 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5d340>)
+2026-02-17 05:59:02,852 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5d340>) completed
+2026-02-17 05:59:02,852 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc462f0>)
+2026-02-17 05:59:02,852 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc462f0>) completed
+2026-02-17 05:59:02,852 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc14ea0>
+INFO:     127.0.0.1:51356 - "GET /api/account HTTP/1.1" 200 OK
+2026-02-17 05:59:02,853 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc14ea0> completed
+INFO:     ('127.0.0.1', 51362) - "WebSocket /ws" [accepted]
+2026-02-17 05:59:02,861 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+INFO:     127.0.0.1:51356 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51328 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:59:02,886 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc55080>
+2026-02-17 05:59:02,886 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc55080> completed
+2026-02-17 05:59:02,886 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc47b50>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 05:59:02,887 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc47b50>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 05:59:02,887 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5ca40>)
+2026-02-17 05:59:02,888 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5ca40>) completed
+2026-02-17 05:59:02,888 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5ca40>)
+2026-02-17 05:59:02,889 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5ca40>) completed
+2026-02-17 05:59:02,889 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc47b50>)
+2026-02-17 05:59:02,889 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc47b50>) completed
+2026-02-17 05:59:02,889 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc16660>
+2026-02-17 05:59:02,889 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc16660> completed
+INFO:     127.0.0.1:51342 - "GET /api/account HTTP/1.1" 200 OK
+2026-02-17 05:59:02,957 - INFO - WebSocket disconnected. Total connections: 1
+INFO:     connection closed
+INFO:     127.0.0.1:51342 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51328 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 51372) - "WebSocket /ws" [accepted]
+2026-02-17 05:59:07,963 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+INFO:     127.0.0.1:51328 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51342 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51342 - "GET /api/market/candles?symbol=NIFTY&interval=5&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51328 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:59:14,690 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc16200>
+2026-02-17 05:59:14,690 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc16200> completed
+2026-02-17 05:59:14,691 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbeee30>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 05:59:14,691 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbeee30>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 05:59:14,691 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5c940>)
+2026-02-17 05:59:14,691 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5c940>) completed
+2026-02-17 05:59:14,692 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5c940>)
+2026-02-17 05:59:14,692 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5c940>) completed
+2026-02-17 05:59:14,692 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbeee30>)
+2026-02-17 05:59:14,692 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbeee30>) completed
+2026-02-17 05:59:14,692 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc14180>
+2026-02-17 05:59:14,692 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc14180> completed
+INFO:     127.0.0.1:44296 - "GET /api/account HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44296 - "GET /api/market/candles?symbol=NIFTY&interval=5&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51328 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51328 - "GET /api/market/candles?symbol=NIFTY&interval=5&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44296 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 05:59:26,413 - INFO - WebSocket disconnected. Total connections: 1
+2026-02-17 05:59:26,415 - INFO - WebSocket disconnected. Total connections: 0
+INFO:     connection closed
+INFO:     connection closed
+INFO:     ('127.0.0.1', 40198) - "WebSocket /ws" [accepted]
+2026-02-17 06:03:09,347 - INFO - WebSocket connected. Total connections: 1
+INFO:     connection open
+INFO:     127.0.0.1:40210 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40216 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+2026-02-17 06:03:09,370 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc174c0>
+2026-02-17 06:03:09,370 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc174c0> completed
+2026-02-17 06:03:09,370 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbee200>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 06:03:09,371 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedbee200>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 06:03:09,371 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedbd9cc0>)
+2026-02-17 06:03:09,371 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedbd9cc0>) completed
+2026-02-17 06:03:09,371 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedbd9cc0>)
+2026-02-17 06:03:09,371 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedbd9cc0>) completed
+2026-02-17 06:03:09,371 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbee200>)
+2026-02-17 06:03:09,371 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedbee200>) completed
+2026-02-17 06:03:09,371 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc151c0>
+INFO:     127.0.0.1:40226 - "GET /api/account HTTP/1.1" 200 OK
+2026-02-17 06:03:09,372 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc151c0> completed
+INFO:     127.0.0.1:40226 - "GET /api/market/candles?symbol=NIFTY&interval=1&n_bars=100 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:40210 - "GET /api/market/oi-data?symbol=NIFTY HTTP/1.1" 200 OK
+INFO:     ('127.0.0.1', 40238) - "WebSocket /ws" [accepted]
+2026-02-17 06:03:09,392 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+2026-02-17 06:03:09,393 - DEBUG - executing <function connect.<locals>.connector at 0x7febedc14a40>
+2026-02-17 06:03:09,393 - DEBUG - operation <function connect.<locals>.connector at 0x7febedc14a40> completed
+2026-02-17 06:03:09,394 - DEBUG - executing functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc47880>, 'SELECT data FROM accounts LIMIT 1', [])
+2026-02-17 06:03:09,394 - DEBUG - operation functools.partial(<built-in method execute of sqlite3.Connection object at 0x7febedc47880>, 'SELECT data FROM accounts LIMIT 1', []) completed
+2026-02-17 06:03:09,394 - DEBUG - executing functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5e0c0>)
+2026-02-17 06:03:09,394 - DEBUG - operation functools.partial(<built-in method fetchone of sqlite3.Cursor object at 0x7febedc5e0c0>) completed
+2026-02-17 06:03:09,397 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5e0c0>)
+2026-02-17 06:03:09,397 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Cursor object at 0x7febedc5e0c0>) completed
+2026-02-17 06:03:09,397 - DEBUG - executing functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc47880>)
+2026-02-17 06:03:09,397 - DEBUG - operation functools.partial(<built-in method close of sqlite3.Connection object at 0x7febedc47880>) completed
+2026-02-17 06:03:09,398 - DEBUG - executing <function Connection.stop.<locals>.close_and_stop at 0x7febedc54e00>
+2026-02-17 06:03:09,398 - DEBUG - operation <function Connection.stop.<locals>.close_and_stop at 0x7febedc54e00> completed
+INFO:     127.0.0.1:40216 - "GET /api/account HTTP/1.1" 200 OK
+2026-02-17 06:03:09,478 - INFO - WebSocket disconnected. Total connections: 1
+INFO:     connection closed
+2026-02-17 06:03:09,479 - INFO - WebSocket disconnected. Total connections: 0
+INFO:     connection closed
+INFO:     ('127.0.0.1', 55742) - "WebSocket /ws" [accepted]
+2026-02-17 06:03:14,480 - INFO - WebSocket connected. Total connections: 1
+INFO:     connection open
+INFO:     ('127.0.0.1', 55746) - "WebSocket /ws" [accepted]
+2026-02-17 06:03:14,493 - INFO - WebSocket connected. Total connections: 2
+INFO:     connection open
+2026-02-17 06:03:30,332 - INFO - WebSocket disconnected. Total connections: 1
+INFO:     connection closed
+2026-02-17 06:03:30,332 - INFO - WebSocket disconnected. Total connections: 0
+INFO:     connection closed
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-02-17 06:03:57,752 - INFO - Shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [64631]

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { createChart, ColorType, HistogramSeries } from 'lightweight-charts';
+import { createChart, ColorType } from 'lightweight-charts';
 
 export const OptionsChart = ({ candles, symbol }) => {
   const chartContainerRef = useRef();
@@ -29,7 +29,7 @@ export const OptionsChart = ({ candles, symbol }) => {
       },
     });
 
-    seriesRef.current = chartRef.current.addSeries(HistogramSeries, {
+    seriesRef.current = chartRef.current.addHistogramSeries({
       color: '#8f7cff',
       priceFormat: {
         type: 'volume',

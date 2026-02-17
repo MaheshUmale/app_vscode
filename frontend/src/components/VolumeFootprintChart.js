@@ -17,11 +17,27 @@ export const VolumeFootprintChart = ({ candles, interval }) => {
     let maxLevelVol = 0;
     let pocPrice = null;
 
+    const midPoint = (open + close) / 2;
+    const range = high - low || 1;
+
     for (let p = Math.floor(low / step) * step; p <= Math.ceil(high / step) * step; p += step) {
       const isBullish = close >= open;
-      // Mocking level distribution
-      const levelVol = Math.floor(volume / ((high - low) / step + 1)) + Math.floor(Math.random() * 100);
-      const buyVol = isBullish ? Math.floor(levelVol * 0.6) : Math.floor(levelVol * 0.4);
+
+      // Improved distribution: higher volume near the midpoint of the candle body
+      const distance = Math.abs(p - midPoint);
+      const weight = Math.exp(-0.5 * Math.pow(distance / (range / 4), 2));
+
+      const avgVolPerLevel = volume / ((high - low) / step + 1);
+      const levelVol = Math.floor(avgVolPerLevel * weight * 1.5) + 10;
+
+      // Distribution between buy and sell based on price position relative to open/close
+      let buyRatio = 0.5;
+      if (p > open && p < close) buyRatio = 0.7; // Inside bullish body
+      else if (p < open && p > close) buyRatio = 0.3; // Inside bearish body
+      else if (p > Math.max(open, close)) buyRatio = 0.4; // Upper wick
+      else buyRatio = 0.6; // Lower wick
+
+      const buyVol = Math.floor(levelVol * buyRatio);
       const sellVol = levelVol - buyVol;
 
       if (levelVol > maxLevelVol) {

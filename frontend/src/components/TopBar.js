@@ -1,17 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const TopBar = ({ symbol, livePrice, account, onSymbolChange }) => {
   const symbols = ['NIFTY', 'BANKNIFTY', 'FINNIFTY'];
-  
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const formatPrice = (price) => {
     return price ? price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00';
   };
-
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const getCurrentTime = () => {
     const now = new Date();
@@ -25,29 +24,31 @@ export const TopBar = ({ symbol, livePrice, account, onSymbolChange }) => {
 
   return (
     <div className="top-bar" data-testid="top-bar">
-      <select 
-        className="symbol-selector"
-        value={symbol}
-        onChange={(e) => onSymbolChange(e.target.value)}
-        data-testid="symbol-selector"
-      >
-        {symbols.map(sym => (
-          <option key={sym} value={sym}>{sym} | 23 FEB EXP</option>
-        ))}
-      </select>
+      <div className="symbol-selector-container">
+        <select
+          className="symbol-selector"
+          value={symbol}
+          onChange={(e) => onSymbolChange(e.target.value)}
+          data-testid="symbol-selector"
+        >
+          {symbols.map(sym => (
+            <option key={sym} value={sym}>{sym} | 23 FEB EXP</option>
+          ))}
+        </select>
+      </div>
 
       <div className="price-info" data-testid="price-info">
         <span className="price-value" data-testid="price-value">{formatPrice(currentPrice)}</span>
         <span className={`price-change ${isPositive ? 'positive' : 'negative'}`} data-testid="price-change">
           {isPositive ? '+' : ''}{changePercent.toFixed(2)}% ↑
         </span>
-        <span style={{ fontSize: '0.9rem', color: '#a8a8b8', marginLeft: '1rem' }}>
+        <span className="timestamp" style={{ fontSize: '0.9rem', color: '#a8a8b8', marginLeft: '1rem' }}>
           {livePrice?.timestamp ? new Date(livePrice.timestamp).toLocaleTimeString('en-IN') : (mounted ? getCurrentTime() : '--:--:--')}
         </span>
       </div>
 
       <div className="time-balance" data-testid="time-balance">
-        <div style={{ color: '#a8a8b8' }}>
+        <div className="latency-info" style={{ color: '#a8a8b8', display: 'flex', alignItems: 'center' }}>
           <span style={{ marginRight: '0.5rem' }}>●</span>
           <span>-5ms</span>
         </div>
